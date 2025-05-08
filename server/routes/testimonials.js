@@ -5,11 +5,11 @@ const adminController = require('../controllers/adminController');
 
 // Public routes
 router.get('/', testimonialsController.getAllTestimonials);
-router.post('/', testimonialsController.createTestimonial);
+router.post('/', testimonialsController.upload, testimonialsController.createTestimonial);
 
 // Admin routes
-router.post('/admin/create', adminController.createTestimonial);
-router.put('/admin/update/:id', adminController.updateTestimonial);
+router.post('/admin/create', adminController.upload.single('image'), adminController.createTestimonial);
+router.put('/admin/update/:id', adminController.upload.single('image'), adminController.updateTestimonial);
 router.delete('/admin/delete/:id', adminController.deleteTestimonial);
 
 module.exports = router;

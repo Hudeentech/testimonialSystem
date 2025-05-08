@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const fileUpload = require('express-fileupload');
 const testimonialsRouter = require('./routes/testimonials');
 require('dotenv').config();
 const cors = require('cors');
@@ -10,16 +9,23 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload({
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
-  createParentPath: true
+
+// CORS configuration
+app.use(cors( {
+  origin: 'http://localhost:5173' || 'http://localhost:5173', // Allow all origins by default
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Serve uploaded files statically
+// Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 // Routes
 app.use('/api/testimonials', testimonialsRouter);
@@ -29,10 +35,14 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('Database connection error:', err));
+.then(() => console.log('Connected to MongoDB'))
+.catch((err) => console.error('Database connection error:', err));
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// For Vercel serverless deployment
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

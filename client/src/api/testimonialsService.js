@@ -1,6 +1,8 @@
+import axios from 'axios';
+
 // testimonialsService.js
 
-const API_BASE_URL = 'http://localhost:3000/api/testimonials';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/testimonials';
 
 // Custom toast notification function
 const showToast = (message, type = 'error') => {
@@ -73,7 +75,7 @@ export async function createTestimonial(testimonial) {
       }
     });
 
-    const response = await fetch(`${API_BASE_URL}/admin/create`, {
+    const response = await fetch(API_BASE_URL, {
       method: 'POST',
       body: formData,
     });
