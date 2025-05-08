@@ -114,7 +114,7 @@ export default function Testimonial() {
                   Loved Your Experience? <br /> Share the Love!
                 </h2>
                 <p className="text-gray-400 mb-4">
-                  Your testimonial can help others just like you benefit from [Your Business/Product/Service].
+                  Your testimonial will help us grow and build a solid brand accross the internet.
                 </p>
               </div>
 
