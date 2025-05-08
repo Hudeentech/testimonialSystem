@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchTestimonials, deleteTestimonial } from '../api/testimonialsService';
 
-const BACKEND_URL = 'http://localhost:3000' || "https://testimonial-system.vercel.app";
+const BACKEND_URL = "https://testimonial-system.vercel.app" // Adjust this URL based on your backend setup;
 
 const Dashboard = () => {
   const [testimonials, setTestimonials] = useState([]);

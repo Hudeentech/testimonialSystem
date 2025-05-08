@@ -13,10 +13,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS configuration
-app.use(cors( {
-  origin: 'http://localhost:5173' || 'http://localhost:5173', // Allow all origins by default
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 // Serve uploaded files

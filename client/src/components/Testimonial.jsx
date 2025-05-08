@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { createTestimonial } from '../api/testimonialsService';
 
 const MAX_FILE_SIZE_MB = 12;
@@ -29,6 +29,8 @@ export default function Testimonial() {
     image: null
   });
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -36,36 +38,52 @@ export default function Testimonial() {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files?.[0]; // Safe access
+    const file = e.target.files?.[0];
     if (!file) {
-        console.warn('No file selected.');
-        return;
+      return;
     }
 
-    console.log("Selected image:", file);
-    setFormData((prevFormData) => ({
-        ...prevFormData,
-        image: file
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const maxSize = 12 * 1024 * 1024; // 12MB
+
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Please upload a JPEG, PNG, or GIF image.', 'error');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    if (file.size > maxSize) {
+      showToast('Image size must be less than 12MB.', 'error');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      image: file
     }));
-};
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.image) {
-      console.error("No image found in state");
-  } else {
-      console.log("Appending image to form data:", formData.image);
-  }
-  
+    setIsLoading(true);
 
     try {
       await createTestimonial(formData);
       setShowModal(true);
       setFormData({ name: '', company: '', jobTitle: '', message: '', image: null });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error) {
       console.error('Error submitting testimonial:', error);
-      showToast('Failed to submit testimonial. Please try again.');
+      showToast(error.message || 'Failed to submit testimonial. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,10 +107,10 @@ export default function Testimonial() {
 
       <div className="container mx-auto p-4 md:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="p-6 rounded-lg">
+          <div className="lg:p-6 rounded-lg">
             <form onSubmit={handleSubmit}>
               <div className='bg-gradient-to-b from-amber-300 to-yellow-700 bg-clip-text'>
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-transparent mb-2">
+                <h2 className="text-4xl  lg:text-6xl font-semibold text-transparent mb-2">
                   Loved Your Experience? <br /> Share the Love!
                 </h2>
                 <p className="text-gray-400 mb-4">
@@ -152,23 +170,42 @@ export default function Testimonial() {
                 ></textarea>
               </div>
 
-              <div className="mb-6">
-                <label htmlFor="image" className="block text-gray-300 text-sm mb-2">Upload Image (Optional)</label>
+              <div className="mb-6 border-2 border-dashed rounded-lg p-4 border-[#ffd90067]">
+                <label htmlFor="image" className="block text-gray-300 text-sm mb-2">Please Upload Image</label>
                 <input
                 type="file"
                 id="image"
+                ref={fileInputRef}
                 onChange={handleImageChange}
-                className="..."
-                accept="image/*"
+                className="block w-full text-sm text-gray-300
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:cursor-pointer"
+                accept="image/jpeg,image/png,image/gif"
+                required
               />
 
               </div>
 
               <button
                 type="submit"
-                className="bg-yellow-400 text-gray-900 font-semibold rounded-full py-3 px-6 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+                disabled={isLoading}
+                className={`bg-yellow-400 text-gray-900 font-semibold rounded-full py-3 px-6 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center`}
               >
-                Submit <i className="fa-solid fa-arrow-right ml-2"></i>
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    Submit <i className="fa-solid fa-arrow-right ml-2"></i>
+                  </>
+                )}
               </button>
             </form>
 
@@ -182,7 +219,7 @@ export default function Testimonial() {
             </div>
           </div>
 
-          <div className="hidden sticky top-8 h-[90dvh] p-4 lg:p-6 bg-[#222b] rounded-lg md:flex flex-col justify-center items-start">
+          <div className="hidden sticky top-8 h-[90dvh] p-4 lg:p-6 bg-[#222b] rounded-lg lg:flex flex-col justify-center items-start">
             <div className="flex justify-center items-center">
               <img src="./Group 72.png" alt="testimonial-illustration" className="w-full object-contain p-4" />
             </div>

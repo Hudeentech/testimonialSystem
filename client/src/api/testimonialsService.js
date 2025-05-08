@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // testimonialsService.js
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/testimonials';
+const API_BASE_URL = 'https://testimonial-system.vercel.app/api/testimonials'; // Adjust this URL based on your backend setup
 
 // Custom toast notification function
 const showToast = (message, type = 'error') => {
@@ -49,15 +49,13 @@ export async function fetchTestimonials() {
   }
 }
 
-// Create a new testimonial
 export async function createTestimonial(testimonial) {
   try {
     const formData = new FormData();
 
-    // Validate image file if present
-    if (testimonial.image) {
+    if (testimonial.image instanceof File) {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      const maxSizeBytes = 12 * 1024 * 1024; // 12MB
+      const maxSizeBytes = 12 * 1024 * 1024;
 
       if (!allowedTypes.includes(testimonial.image.type)) {
         throw new Error('Invalid file type. Only JPEG, PNG, and GIF allowed.');
@@ -66,24 +64,24 @@ export async function createTestimonial(testimonial) {
       if (testimonial.image.size > maxSizeBytes) {
         throw new Error('File size exceeds the 12MB limit.');
       }
+
+      formData.append('image', testimonial.image);
     }
 
-    // Append fields
-    Object.entries(testimonial).forEach(([key, val]) => {
-      if (val !== undefined && val !== null) {
-        formData.append(key, val);
-      }
-    });
+    // Append other fields
+    formData.append('name', testimonial.name);
+    formData.append('message', testimonial.message);
+    formData.append('jobTitle', testimonial.jobTitle);
+    formData.append('company', testimonial.company);
 
-    const response = await fetch(API_BASE_URL, {
+    const response = await fetch(`${API_BASE_URL}/admin/create`, {
       method: 'POST',
       body: formData,
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      console.log('Server response:', errorData);
-      throw new Error(errorData?.message || 'Failed to create testimonial');
+      throw new Error(errorData?.error || 'Failed to create testimonial');
     }
 
     const result = await response.json();
@@ -91,7 +89,7 @@ export async function createTestimonial(testimonial) {
     return result;
   } catch (error) {
     console.error('Error creating testimonial:', error);
-    showToast(error.message || 'Error creating testimonial. Please try again.');
+    showToast(error.message || 'Error creating testimonial.');
     throw error;
   }
 }
