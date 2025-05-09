@@ -1,8 +1,6 @@
-import axios from 'axios';
-
 // testimonialsService.js
 
-const API_BASE_URL = 'https://testimonial-system.vercel.app/api/testimonials'; // Adjust this URL based on your backend setup
+const API_BASE_URL = 'https://testimonial-system.vercel.app/api/testimonials';
 
 // Custom toast notification function
 const showToast = (message, type = 'error') => {
@@ -33,15 +31,26 @@ export async function fetchTestimonials() {
     }
     const data = await response.json();
     console.log('Raw response from server:', data);
-    // Log each testimonial's image path
-    data.forEach(testimonial => {
-      console.log('Testimonial:', {
+    
+    // Validate and format dates
+    const validatedData = data.map(testimonial => {
+      // Ensure createdAt is a valid date string
+      if (!testimonial.createdAt) {
+        console.warn('Missing createdAt for testimonial:', testimonial._id);
+        testimonial.createdAt = new Date().toISOString(); // Use current date as fallback
+      }
+      
+      // Log date parsing attempt
+      console.log('Processing date:', {
         id: testimonial._id,
-        name: testimonial.name,
-        image: testimonial.image
+        rawDate: testimonial.createdAt,
+        parsedDate: new Date(testimonial.createdAt)
       });
+      
+      return testimonial;
     });
-    return data;
+
+    return validatedData;
   } catch (error) {
     console.error('Error fetching testimonials:', error);
     showToast('Error fetching testimonials. Please try again.');
