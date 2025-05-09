@@ -292,10 +292,10 @@ const Dashboard = () => {
         <h2 className='text-3xl lg:text-5xl font-bold text-transparent'>Dashboard</h2>
       </div>
 
-      <div className='bg-[#1f1f1f] p-6 rounded-lg text-gray-200 mb-6 shadow-md'>
+      <div className='bg-[#1f1f1f] p-2 lg:p-6 rounded-lg text-gray-200 mb-6 shadow-md'>
         <div className='flex justify-between items-center mb-4'>
           <div>
-            <p className='text-lg mb-2'>Manage your testimonials collection.</p>
+            
             <p className='text-xl'>Total Testimonials: <span className='text-yellow-400 font-bold'>{totalTestimonials}</span></p>
             <p className='text-xl'>Average Rating: <span className='text-yellow-400 font-bold'>{averageRating}</span> / 5</p>
           </div>
@@ -316,7 +316,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <ul className='bg-[#222b] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 rounded-md p-4 min-h-[fit-content] gap-4'>
+      <ul className='bg-[#222b] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 rounded-md p-2 min-h-[fit-content] gap-4'>
         {testimonials.map((testimonial) => (
           <li
             key={testimonial._id}
